@@ -1,0 +1,62 @@
+# NOTE: Use limit_val_batches = 0.01
+model:
+    target: tats.tats_vqgan.VQGAN_replicate
+    params:
+      save_dir: datasets/2024_6to6
+      before: 360
+      mse_codebook: True
+      image_channels: 16
+      embedding_dim: 1024 # 256 in MAGVIT paper
+      n_codes: 1024
+      n_hiddens: 64
+      downsample: [1, 16, 16]
+      disc_channels: 64
+      disc_layers: 5
+      discriminator_iter_start: 1
+      disc_loss_type: hinge
+      image_gan_weight: 0.0
+      video_gan_weight: 0.01
+      f1_weight: 0.0
+      l1_weight: 4.0
+      gan_feat_weight: 0
+      perceptual_weight: 0
+      i3d_feat: False
+      restart_thres: 1
+      no_random_restart: True
+      norm_type: group
+      padding_type: reflect
+      normalize_input: True
+      mask_disc: False
+
+data:
+    vqgan: True
+    batch_size: 6
+    val_batch_size: 6
+    num_workers: 12
+    image_channels: 16
+    data_interval: 10
+    input_interval: 10
+    before: 360
+    output_interval: 10
+    after: 360
+    validation_use_also_train_set: False
+    sort_val: True
+    vtoken: False
+    spatial_to_channel: [4, 4]
+    pooling: [1024, 1024]
+    hsr_data_path: 'datasets/all_dBZ.h5'
+    gz_data_path: 'datasets/HSR_dBZ'
+
+    train:
+        include: []
+        exclude: ['201703.*', '201705.*', '2018.*']
+    test:
+        include: []
+        exclude: ['201703.*', '201705.*', '2018.*']
+
+exp:
+    base_lr: 0.0
+    exact_lr: 1e-5
+    cosine_lr: True
+    warmup_steps: 1000
+    gradient_clip_val: 1.0

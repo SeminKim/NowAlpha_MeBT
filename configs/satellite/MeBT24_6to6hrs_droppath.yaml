@@ -1,0 +1,141 @@
+# NOTE: Use limit_val_batches = 0.01
+model:
+    target: tats.COMMIT_transformer.Net2NetTransformerVToken
+    params:
+        load_dBZ: True
+        unconditional: True
+        vocab_size: 1024
+        first_stage_vocab_size: 1024
+        block_size: 18432
+        n_layer: 24
+        n_head: 16
+        n_embd: 1024
+        n_unmasked: 0
+        embd_pdrop: 0.1
+        resid_pdrop: 0.1
+        attn_pdrop: 0.1
+        path_pdrop: 0.3
+        sample_every_n_latent_frames: 0
+        first_stage_key: video
+        interior_key: interior_video
+        cond_stage_key: label
+        independence: False
+        vtokens: False
+        vtokens_pos: False
+        vis_epoch: 1
+        blocks: [[0]]
+        milestone: [0]
+        alibi: False
+        keep_num: [0]
+        sos_emb: 0
+        avg_loss: True
+        t_prior: longest
+        mode:
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+            - targets
+        decode:
+            steps: 5
+            sampling_temperature: 1.0
+            mask_temperature: 4.5
+
+    mask:
+        target: tats.mask_sampler.CommitMaskGen
+        params:
+            iid: False
+            schedule: cosine
+            max_token: 18432
+            method: 'mlm'
+            shape: [72, 16, 16]
+            t_range: [0.0, 0.5]
+            budget: 18432
+    vqvae:
+        target: tats.tats_vqgan.VQGAN_decoder
+        params:
+          load_path: KMA_3DVQ/1ap18xwq/checkpoints/latest_checkpoint.ckpt
+          mse_codebook: True
+          image_channels: 16
+          embedding_dim: 1024 # 256 in MAGVIT paper
+          n_codes: 1024
+          n_embed: 1024
+          n_hiddens: 64
+          downsample: [1, 16, 16]
+          disc_channels: 64
+          disc_layers: 5
+          discriminator_iter_start: 1
+          disc_loss_type: hinge
+          image_gan_weight: 0.0
+          video_gan_weight: 0.0
+          f1_weight: 0.0
+          l1_weight: 4.0
+          gan_feat_weight: 0
+          perceptual_weight: 0
+          i3d_feat: False
+          restart_thres: 1
+          no_random_restart: True
+          norm_type: group
+          padding_type: reflect
+          normalize_input: True
+          mask_disc: False
+
+data:
+    load_dBZ: True
+    vqgan: False
+    batch_size: 2
+    val_batch_size: 2
+    num_workers: 3
+    image_channels: 16
+    COMMIT: True
+    data_interval: 10
+    input_interval: 10
+    before: 360
+    output_interval: 10
+    after: 360
+    use_time: True
+    validation_use_also_train_set: False
+    val_vtoken: True
+    sort_val: True
+    vtoken_train:
+        hsr_data_path: 'datasets/2024_6to6/2024_3dvq_aggregated_chunk.h5'
+        hsr_interior_path: 'datasets/2024_6to6/2024_3dvq_replicate_aggregated_chunk.h5'
+        include: []
+        exclude: ['2020.*', '201703.*', '201705.*']
+    train:
+        hsr_data_path: 'datasets/2024_6to6/2024_3dvq_aggregated_chunk.h5'
+        hsr_interior_path: 'datasets/2024_6to6/2024_3dvq_replicate_aggregated_chunk.h5'
+        include: []
+        exclude: ['2020.*', '201703.*', '201705.*']
+    test:
+        hsr_data_path: 'datasets/2024_6to6/2024_3dvq_aggregated_chunk.h5'
+        hsr_interior_path: 'datasets/2024_6to6/2024_3dvq_replicate_aggregated_chunk.h5'
+        gz_data_path: 'datasets/HSR_dBZ'
+        include: ['2020.*']
+        exclude: []
+
+exp:
+    accumulate_grad_batches: 3
+    base_lr: 0.0
+    exact_lr: 3e-4
+    cosine_lr: True
+    warmup_steps: 30000 # 30
